@@ -1,6 +1,7 @@
 package data
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"time"
@@ -54,7 +55,10 @@ func (m *MovieModel) Insert(movie *Movie) error {
 		pq.Array(movie.Genres),
 	}
 
-	row := m.DB.QueryRow(query, args...)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	row := m.DB.QueryRowContext(ctx, query, args...)
 
 	return row.Scan(
 		&movie.ID,
@@ -75,7 +79,10 @@ func (m *MovieModel) Get(id int64) (*Movie, error) {
 	`
 	var movie Movie
 
-	row := m.DB.QueryRow(query, id)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	row := m.DB.QueryRowContext(ctx, query, id)
 	err := row.Scan(
 		&movie.ID,
 		&movie.CreatedAt,
@@ -115,7 +122,10 @@ func (m *MovieModel) Update(movie *Movie) error {
 		movie.Version,
 	}
 
-	row := m.DB.QueryRow(query, args...)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	row := m.DB.QueryRowContext(ctx, query, args...)
 	err := row.Scan(&movie.Version)
 	if err != nil {
 		switch {
@@ -139,7 +149,10 @@ func (m *MovieModel) Delete(id int64) error {
 		WHERE id = $1
 	`
 
-	result, err := m.DB.Exec(query, id)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := m.DB.ExecContext(ctx, query, id)
 	if err != nil {
 		return err
 	}
