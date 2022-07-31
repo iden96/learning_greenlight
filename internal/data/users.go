@@ -11,6 +11,8 @@ import (
 	"greenlight.iden69.com/internal/validator"
 )
 
+var AnonymousUser = &User{}
+
 var (
 	ErrDuplicateEmail = errors.New("duplicate email")
 )
@@ -25,13 +27,13 @@ type User struct {
 	Version   int       `json:"-"`
 }
 
+func (u *User) IsAnonymous() bool {
+	return u == AnonymousUser
+}
+
 type password struct {
 	plaintext *string
 	hash      []byte
-}
-
-type UserModel struct {
-	DB *sql.DB
 }
 
 func (p *password) Set(plaintextPassword string) error {
@@ -58,6 +60,10 @@ func (p *password) Matches(plaintextPassword string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+type UserModel struct {
+	DB *sql.DB
 }
 
 func (m UserModel) Insert(user *User) error {
