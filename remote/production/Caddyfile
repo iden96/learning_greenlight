@@ -1,0 +1,8 @@
+{
+  email: me@example.com
+}
+
+127.0.0.1 {
+  respond /debug/* "Not Permitted" 403
+  reverse_proxy localhost:4000
+}
